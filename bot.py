@@ -241,14 +241,14 @@ class Kirito(commands.Bot):
         return filenames
 
     async def parse_attachments(self, message):
-        special_characters = [' ', '[SYSTEM]', '[', ']']
-        congratulations = ''
-
         filenames = []
         filenames = await self.create_tasks(message)
-
         if len(filenames) == 0:
             return
+        
+        special_characters = [' ', '[SYSTEM]', '[', ']']
+        records = {}
+        treasure_records = {}
 
         for filename in filenames:
             filename = f"./temp/{filename}"
@@ -267,9 +267,6 @@ class Kirito(commands.Bot):
 
             text = pytesseract.image_to_string(image, lang='chi_tra', config='--psm 6')
             rows = text.replace(' ', '').replace('獲得了', '得').replace('獲得', '得').split('\n')
-
-            treasure_records = {}
-            records = {}
 
             for row in rows:
                 for c in special_characters:
@@ -301,7 +298,7 @@ class Kirito(commands.Bot):
                     records[name].append({'type': type, 'item': item, 'capsule': capsule})
 
                 elif '得' in row:
-                    type = 'obtain'
+                    type = 'treasure'
 
                     name, item = row.split('。')[0].split('得')
 
@@ -329,25 +326,9 @@ class Kirito(commands.Bot):
                         records[name] = []
                     records[name].append({'type': type, 'item': item})
                     
-            if len(treasure_records) > 0:
-                records = treasure_records
-                self.insert_data(treasure_records)
-            
-            for name, items in records.items():
-                if name == '未知':
-                    congratulations += '不知道你是誰，恭喜你獲得'
-                else:
-                    congratulations += f"恭喜【{name}】獲得"
-                for item in items:
-                    if item['type'] == 'enhance':
-                        congratulations = congratulations[:-2]
-                        congratulations += f"成功強化至【{item['item']}】"
-                    elif item['type'] == 'capsule':
-                        congratulations = congratulations[:-2]
-                        congratulations += f"在【{item['capsule']}】獲得【{item['item']}】"
-                    elif item['type'] == 'obtain':
-                        congratulations += f"【{item['item']}】"
-                congratulations += '\n'
+        if len(treasure_records) > 0:
+            records = treasure_records
+            self.insert_data(treasure_records)
 
         [os.remove(f"./temp/{filename}") for filename in filenames if os.path.exists(f"./temp/{filename}")]
 
@@ -355,7 +336,7 @@ class Kirito(commands.Bot):
             return
 
         await message.channel.send(file=discord.File('./image/congratulations.png'))
-        await message.channel.send(congratulations)
+        await message.channel.send(self.generate_congratulations(records))
 
     def insert_data(self, records):
         connection = sqlite3.connect(DB)
@@ -383,6 +364,42 @@ class Kirito(commands.Bot):
 
         connection.execute(sql[:-1])
         connection.commit()
+
+    def generate_congratulations(self, records):
+        congratulations = ''
+        if len(records) > 1:
+            congratulations += '【恭喜以下英雄】\n\n'
+        for name, record in records.items():
+            if len(records) == 1 and name == '未知':
+                congratulations += '不知道你是誰，恭喜你獲得'
+            elif len(records) == 1:
+                congratulations += f"恭喜【{name}】獲得"
+            elif len(records) > 1:
+                congratulations += f"【{name}】獲得"
+
+            organized_records = {}
+            for item in record:
+                if item['type'] != 'treasure':
+                    continue
+                if item['item'] not in organized_records:
+                    organized_records[item['item']] = 1
+                else:
+                    organized_records[item['item']] += 1
+
+            for item in record:
+                if item['type'] == 'enhance':
+                    congratulations = congratulations[:-2]
+                    congratulations += f"成功強化至【{item['item']}】"
+                elif item['type'] == 'capsule':
+                    congratulations = congratulations[:-2]
+                    congratulations += f"在【{item['capsule']}】獲得【{item['item']}】"
+                elif item['type'] == 'treasure':
+                    for item, count in organized_records.items():
+                        count = f" × {count}" if count > 1 else ''
+                        congratulations += f"【{item}{count}】"
+                    break
+            congratulations += '\n'
+        return congratulations
 
     @tasks.loop(seconds=1)
     async def show_treasure_statistics(self):
