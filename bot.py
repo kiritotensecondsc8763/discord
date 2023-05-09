@@ -215,26 +215,27 @@ class Kirito(commands.Bot):
         image = Image.open(filename)
         image.save(filename, dpi=(300,300))
 
-    async def download_image(self, url):
+    async def download_image(self, index, url):
         accepted_extensions = ['.jpg', '.jpeg', '.png']
         parsed_url = urlparse(url)
         extension = splitext(basename(parsed_url.path))[1]
+        if extension not in accepted_extensions:
+            return
 
-        if extension in accepted_extensions:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    dir = "./temp"
-                    filename = url.split('/')[-1]
-                    if not os.path.exists(dir):
-                        os.makedirs(dir)
-                    with open(f"{dir}/{filename}", 'wb') as f:
-                        f.write(await response.content.read())
-            return filename
-        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                dir = "./temp"
+                filename = f"t{index}{extension}"
+                if not os.path.exists(dir):
+                    os.makedirs(dir)
+                with open(f"{dir}/{filename}", 'wb') as f:
+                    f.write(await response.content.read())
+        return filename
+
     async def create_tasks(self, message):
-        tasks = [asyncio.create_task(self.download_image(attachment.url)) for attachment in message.attachments]
+        tasks = [asyncio.create_task(self.download_image(index, attachment.url)) for index, attachment in enumerate(message.attachments)]
         results = await asyncio.wait(tasks)
-    
+
         filenames = []
         [filenames.append(result.result()) for result in results[0] if result.result() is not None]
             
@@ -245,7 +246,7 @@ class Kirito(commands.Bot):
         filenames = await self.create_tasks(message)
         if len(filenames) == 0:
             return
-        
+
         special_characters = [' ', '[SYSTEM]', '[', ']']
         records = {}
         treasure_records = {}
