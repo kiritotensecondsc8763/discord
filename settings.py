@@ -31,7 +31,7 @@ HEROES = [
 ]
 
 TREASURE_KEYWORDS = ['輕薄', '銳利', '穩定', '完整', '剛硬', '光滑', '附魔', '卷軸', '未知', '鬥爭', '封印', '高級', '項鍊']
-BLOCK_KEYWORDS = ['頭', '胸', '腿', '手', '腳', '60', '40']
+BLOCK_KEYWORDS = ['防', '具', '60', '40']
 
 SCROLLS = [
     '殘酷的', '渾沌的', '正義的', '不義的', '怨念', '信念', '審判', '判刑',
@@ -50,7 +50,7 @@ WAKING_STONES = ['傷害增加12%', 'SP消耗減少80', '冷卻時間大幅減�
 
 GLASS_BOTTLE_LEVELS = ['80', '100', '110']
 
-TREASURES = ['高級強化藥水', '特殊戰役:附魔袋', '璀璨的貓咪項鍊']
+TREASURES = ['未知的黃金手環', '璀璨的貓咪項鍊', '特殊戰役:附魔袋', '高級強化藥水']
 [TREASURES.append(f"{scroll}附魔卷軸") for scroll in SCROLLS]
 [TREASURES.append(f"覺醒石：{stone}") for stone in WAKING_STONES]
 [TREASURES.append(f"未知的玻璃瓶({level}級)") for level in GLASS_BOTTLE_LEVELS]
