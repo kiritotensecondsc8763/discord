@@ -50,7 +50,7 @@ WAKING_STONES = ['傷害增加12%', 'SP消耗減少80', '冷卻時間大幅減�
 
 GLASS_BOTTLE_LEVELS = ['80', '100', '110']
 
-TREASURES = ['未知的黃金手環', '璀璨的貓咪項鍊', '特殊戰役:附魔袋', '高級強化藥水']
+TREASURES = ['未知的黃金手環', '未知的純銀手環', '璀璨的貓咪項鍊', '特殊戰役:附魔袋', '高級強化藥水']
 [TREASURES.append(f"{scroll}附魔卷軸") for scroll in SCROLLS]
 [TREASURES.append(f"覺醒石：{stone}") for stone in WAKING_STONES]
 [TREASURES.append(f"未知的玻璃瓶({level}級)") for level in GLASS_BOTTLE_LEVELS]
