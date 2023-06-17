@@ -198,13 +198,8 @@ class Kirito(commands.Bot):
         return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
     def thresh_binary(self, image):
-        blur = cv2.medianBlur(image, 1)
-        result, image = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV)
+        ret, image = cv2.threshold(image, 85, 255, cv2.THRESH_TOZERO)
         return image
-    
-    def erode(self, image):
-        kernel = np.ones((1, 1), np.uint8)
-        return cv2.erode(image, kernel, iterations = 1)
 
     def sharpen(self, filename):
         image = Image.open(filename)
@@ -257,15 +252,15 @@ class Kirito(commands.Bot):
             image = cv2.imread(filename)
             image = self.super_resolution(image, 2)
             image = self.gray(image)
+            image = cv2.medianBlur(image, 1)
             # blur = cv2.GaussianBlur(image, (0, 0), 50)
             # image = cv2.addWeighted(image, 1.5, blur, -0.5, 0)
-            # image = self.thresh_binary(image)
-            # image = self.erode(image)
+            image = self.thresh_binary(image)
             cv2.imwrite(filename, image)
             self.sharpen(filename)
             self.setDPI(filename)
-            image = Image.open(filename)
 
+            image = Image.open(filename)
             text = pytesseract.image_to_string(image, lang='chi_tra', config='--psm 6')
             rows = text.replace(' ', '').replace('獲得了', '得').replace('獲得', '得').split('\n')
 
