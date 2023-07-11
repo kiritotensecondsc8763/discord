@@ -30,7 +30,7 @@ HEROES = [
     '安潔露可', 'ArutoRiese', '艾克瑟蓮',
 ]
 
-TREASURE_KEYWORDS = ['輕薄', '銳利', '穩定', '完整', '剛硬', '光滑', '特殊', '附魔', '卷軸', '未知', '鬥爭', '封印', '高級', '項鍊']
+TREASURE_KEYWORDS = ['輕薄', '銳利', '穩定', '完整', '剛硬', '光滑', '特殊', '附魔', '卷軸', '未知', '鬥爭', '封印', '高級', '項鍊', '銀輪']
 BLOCK_KEYWORDS = ['防', '具', '60', '40']
 
 SCROLLS = [
@@ -45,12 +45,20 @@ SCROLLS = [
     '平穩的', '堅決的', '擺好姿勢的', '冥想的', '決意的', '幽靜的',
     '爆裂', '疾走', '熱烈', '散步',
 ]
-
-WAKING_STONES = ['傷害增加12%', 'SP消耗減少80', '冷卻時間大幅減少24秒', '冷卻時間減少6秒', '擊倒值增加12%', '耐力消耗減少6']
-
 GLASS_BOTTLE_LEVELS = ['80', '100', '110']
+WAKING_STONES = ['傷害增加12%', 'SP消耗減少80', '冷卻時間大幅減少24秒', '冷卻時間減少6秒', '擊倒值增加12%', '耐力消耗減少6']
+BRACELETS = ['皮革', '青銅', '純銀', '黃金']
+COMPASSES = ['生鏽', '', '閃亮', '完整']
 
-TREASURES = ['未知的黃金手環', '未知的純銀手環', '璀璨的貓咪項鍊', '特殊戰役:附魔袋', '高級強化藥水']
+TREASURES = [
+    '璀璨的貓咪項鍊', '特殊戰役:附魔袋', 
+    '高級強化藥水', 
+]
+
 [TREASURES.append(f"{scroll}附魔卷軸") for scroll in SCROLLS]
-[TREASURES.append(f"覺醒石：{stone}") for stone in WAKING_STONES]
 [TREASURES.append(f"未知的玻璃瓶({level}級)") for level in GLASS_BOTTLE_LEVELS]
+[TREASURES.append(f"未知碎片{grade}階") for grade in range(1, 4)]
+[TREASURES.append(f"鬥爭碎片{grade}階") for grade in range(1, 4)]
+[TREASURES.append(f"覺醒石：{stone}") for stone in WAKING_STONES]
+[TREASURES.append(f"未知的{bracelet}手環") for bracelet in BRACELETS]
+[TREASURES.append(f"篡奪者的{compass}銀輪") for compass in COMPASSES]
