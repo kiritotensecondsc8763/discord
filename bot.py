@@ -309,7 +309,7 @@ class Kirito(commands.Bot):
                             item = f"未知的玻璃瓶({level}級)"
                             break
                     closest_item, score = process.extractOne(item, TREASURES)
-                    if score > 60:
+                    if score > 50:
                         item = closest_item
 
                     if any(t in row for t in TREASURE_KEYWORDS):
