@@ -44,6 +44,7 @@ SCROLLS = [
     '追蹤者的', '亡者的',
     '平穩的', '堅決的', '擺好姿勢的', '冥想的', '決意的', '幽靜的',
     '爆裂', '疾走', '熱烈', '散步',
+    '時空的', '慎重的', '果斷的', '專注的', '突進', '衝突',
 ]
 GLASS_BOTTLE_LEVELS = ['80', '100', '110']
 WAKING_STONES = ['傷害增加12%', 'SP消耗減少80', '冷卻時間大幅減少24秒', '冷卻時間減少6秒', '擊倒值增加12%', '耐力消耗減少6']
@@ -52,7 +53,8 @@ COMPASSES = ['生鏽', '', '閃亮', '完整']
 
 TREASURES = [
     '璀璨的貓咪項鍊', '特殊戰役:附魔袋', 
-    '高級強化藥水', 
+    '高級強化藥水', '高級豺狼人頭目的前爪',
+    '灰燼暮光胸針'
 ]
 
 [TREASURES.append(f"{scroll}附魔卷軸") for scroll in SCROLLS]
@@ -62,3 +64,4 @@ TREASURES = [
 [TREASURES.append(f"覺醒石：{stone}") for stone in WAKING_STONES]
 [TREASURES.append(f"未知的{bracelet}手環") for bracelet in BRACELETS]
 [TREASURES.append(f"篡奪者的{compass}銀輪") for compass in COMPASSES]
+[TREASURES.append(f"墮落者的{compass}銀輪") for compass in COMPASSES]
