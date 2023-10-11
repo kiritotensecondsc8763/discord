@@ -398,18 +398,23 @@ class Kirito(commands.Bot):
         return congratulations
 
     @tasks.loop(seconds=1)
-    async def show_treasure_statistics(self):
-        now = datetime.now(tz=timezone(timedelta(hours=8)))
-        weekday = now.weekday()
-        current_time = now.strftime('%H:%M:%S')
-        if weekday != 0 or current_time != '09:00:00':
-            # print(f"weekday: {weekday}\ncurrent_time: {current_time}")
-            return
-        print(f"show treasure statistics {now.strftime('%Y-%m-%d %H:%M:%S')}")
+    async def show_treasure_statistics(self, start_date:str="", end_date:str=""):
+        is_auto = True if start_date == "" and end_date == "" else False
+        if is_auto:
+            now = datetime.now(tz=timezone(timedelta(hours=8)))
+            weekday = now.weekday()
+            current_time = now.strftime('%H:%M:%S')
+            if weekday != 0 or current_time != '09:00:00':
+                # print(f"weekday: {weekday}\ncurrent_time: {current_time}")
+                return
+            print(f"show treasure statistics {now.strftime('%Y-%m-%d %H:%M:%S')}")
 
-        start_date = now - timedelta(days=7)
-        start_date = start_date.strftime('%Y-%m-%d')
-        end_date = now.strftime('%Y-%m-%d')
+            start_date = now - timedelta(days=7)
+            start_date = start_date.strftime('%Y-%m-%d')
+            end_date = now.strftime('%Y-%m-%d')
+            title = '本週戰利品統計'
+        else:
+            title = '戰利品查詢結果'
 
         connection = sqlite3.connect(DB)
         connection.row_factory = sqlite3.Row
@@ -434,7 +439,7 @@ class Kirito(commands.Bot):
             else:
                 statistics[record['name']][record['item']] = 1
 
-        embed = discord.Embed(title='本週戰利品統計', description=f"{start_date} 9:00 AM ~ {end_date} 9:00 AM", color=0xFDC344)
+        embed = discord.Embed(title=title, description=f"{start_date} 09:00 ~ {end_date} 09:00", color=0xFDC344)
     
         for name, items in statistics.items():
             embed.add_field(name="", value="\n")
@@ -443,4 +448,7 @@ class Kirito(commands.Bot):
                 value += f"{item} × {count}\n"
             embed.add_field(name=f"【{name}】", value=value, inline=False)
 
-        await self.get_channel(TREASURE_CHANNEL).send(embed=embed)
+        if is_auto:
+            await self.get_channel(TREASURE_CHANNEL).send(embed=embed)
+        else:
+            return embed

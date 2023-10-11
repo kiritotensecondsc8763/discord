@@ -6,6 +6,7 @@ from bot import Kirito
 from keep_alive import keep_alive
 from command_list import command_list
 from settings import *
+from datetime import datetime
 
 bot = Kirito()
 
@@ -67,7 +68,37 @@ async def kirito(ctx: commands.Context, say: str):
             f.write(f"{e}\n")
         await thinking.delete()
         await ctx.send('桐人停止了思考，再試一次', file=discord.File('./image/broken_face.png'))
-    
+
+@bot.hybrid_command(name='查詢戰利品紀錄', description='日期格式: yyyyMMdd')
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+@app_commands.describe(開始日期="開始日期", 結束日期="結束日期")
+async def check_treasure_records(ctx: commands.Context, 開始日期: str, 結束日期: str):
+    start_date = 開始日期
+    end_date = 結束日期
+    if start_date.isnumeric() == False or len(start_date) != 8:
+        await ctx.send("開始日期格式錯誤")
+        return
+    if end_date.isnumeric() == False or len(end_date) != 8:
+        await ctx.send("結束日期格式錯誤")
+        return
+    start_date = datetime.strptime(start_date, '%Y%m%d')
+    end_date = datetime.strptime(end_date, '%Y%m%d')
+    if start_date >= end_date:
+        await ctx.send("開始時間必須小於結束時間")
+        return
+    start_date = start_date.strftime('%Y-%m-%d')
+    end_date = end_date.strftime('%Y-%m-%d')
+    try:
+        embed = await bot.show_treasure_statistics(start_date, end_date)
+        if embed == None:
+            await ctx.send(f"{start_date} ~ {end_date} 該區間查無紀錄")
+            return
+        await ctx.send(embed=embed)
+    except Exception as e:
+        with open('log.txt', 'a') as f:
+            f.write(f"{e}\n")
+        await ctx.send('查詢失敗', file=discord.File('./image/broken_face.png'))
+
 if __name__ == '__main__':
     try:
         # keep_alive()
