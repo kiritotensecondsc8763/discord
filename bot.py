@@ -7,7 +7,6 @@ import openai
 import stopit
 import pytesseract
 import cv2
-import numpy as np
 import sqlite3
 import asyncio
 import aiohttp
@@ -227,8 +226,8 @@ class Kirito(commands.Bot):
                     f.write(await response.content.read())
         return filename
 
-    async def create_tasks(self, message):
-        tasks = [asyncio.create_task(self.download_image(index, attachment.url)) for index, attachment in enumerate(message.attachments)]
+    async def parse_attachments(self, attachments):
+        tasks = [asyncio.create_task(self.download_image(index, attachment.url)) for index, attachment in enumerate(attachments)]
         results = await asyncio.wait(tasks)
 
         filenames = []
@@ -236,32 +235,35 @@ class Kirito(commands.Bot):
             
         return filenames
 
-    async def parse_attachments(self, message):
-        filenames = []
-        filenames = await self.create_tasks(message)
-        if len(filenames) == 0:
-            return
+    def parse_image(self, filename):
+        filename = f"./temp/{filename}"
 
+        image = cv2.imread(filename)
+        image = self.super_resolution(image, 2)
+        image = self.gray(image)
+        image = cv2.medianBlur(image, 1)
+        # blur = cv2.GaussianBlur(image, (0, 0), 50)
+        # image = cv2.addWeighted(image, 1.5, blur, -0.5, 0)
+        image = self.thresh_binary(image)
+        cv2.imwrite(filename, image)
+        self.sharpen(filename)
+        self.setDPI(filename)
+
+        image = Image.open(filename)
+        #os.environ['OMP_THREAD_LIMIT'] = '1' #on Linux
+        text = pytesseract.image_to_string(image, lang='chi_tra', config='--psm 6')
+
+        if os.path.exists(filename):
+            os.remove(filename)
+
+        return text
+
+    async def parse_texts(self, texts, message):
         special_characters = [' ', '[SYSTEM]', '[', ']']
         records = {}
         treasure_records = {}
 
-        for filename in filenames:
-            filename = f"./temp/{filename}"
-
-            image = cv2.imread(filename)
-            image = self.super_resolution(image, 2)
-            image = self.gray(image)
-            image = cv2.medianBlur(image, 1)
-            # blur = cv2.GaussianBlur(image, (0, 0), 50)
-            # image = cv2.addWeighted(image, 1.5, blur, -0.5, 0)
-            image = self.thresh_binary(image)
-            cv2.imwrite(filename, image)
-            self.sharpen(filename)
-            self.setDPI(filename)
-
-            image = Image.open(filename)
-            text = pytesseract.image_to_string(image, lang='chi_tra', config='--psm 6')
+        for text in texts:
             rows = text.replace(' ', '').replace('獲得了', '得').replace('獲得', '得').split('\n')
 
             for row in rows:
@@ -325,8 +327,6 @@ class Kirito(commands.Bot):
         if len(treasure_records) > 0:
             records = treasure_records
             self.insert_data(treasure_records)
-
-        [os.remove(f"./temp/{filename}") for filename in filenames if os.path.exists(f"./temp/{filename}")]
 
         if len(records) == 0 or (len(records) > 1 and len(treasure_records) == 0):
             return

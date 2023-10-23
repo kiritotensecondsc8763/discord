@@ -5,10 +5,24 @@ from discord import app_commands
 from bot import Kirito
 from keep_alive import keep_alive
 from command_list import command_list
-from settings import *
 from datetime import datetime
+from multiprocessing import Pool
+from settings import *
 
 bot = Kirito()
+
+def make_command(command):
+    name = command['name']
+    @bot.hybrid_command(name=name, description=command['description'])
+    @app_commands.guilds(discord.Object(id=SERVER_ID))
+    async def name(ctx: commands.Context):
+        await ctx.send(command['response'])
+
+for command in command_list:
+    make_command(command)
+
+def parse_image(filename):
+    return bot.parse_image(filename)
 
 @bot.event
 async def on_ready():
@@ -21,21 +35,15 @@ async def on_message(message):
     if message.author.bot:
         return
     if message.channel.id == TREASURE_CHANNEL:
-        if len(message.attachments) == 0:
+        filenames = await bot.parse_attachments(message.attachments)
+        if len(filenames) == 0:
             return
-        await bot.parse_attachments(message)
+        if __name__ == '__main__':
+            with Pool(os.cpu_count()) as pool:
+                texts = pool.map(parse_image, filenames)
+            await bot.parse_texts(texts, message)
 
     await bot.process_commands(message)
-
-def make_command(command):
-    name = command['name']
-    @bot.hybrid_command(name=name, description=command['description'])
-    @app_commands.guilds(discord.Object(id=SERVER_ID))
-    async def name(ctx: commands.Context):
-        await ctx.send(command['response'])
-
-for command in command_list:
-    make_command(command)
 
 @bot.hybrid_command(name='時裝', description='隨機PO出時裝')
 @app_commands.guilds(discord.Object(id=SERVER_ID))
