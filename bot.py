@@ -318,7 +318,10 @@ class Kirito(commands.Bot):
                         if not any(b in row for b in BLOCK_KEYWORDS):
                             if name not in treasure_records:
                                 treasure_records[name] = []
-                            treasure_records[name].append({'type': type, 'item': item})
+                            if item == '高級強化藥水2個':
+                                treasure_records[name] += [{'type': type, 'item': '高級強化藥水'}] * 2
+                            else:
+                                treasure_records[name].append({'type': type, 'item': item})
 
                     if name not in records:
                         records[name] = []
