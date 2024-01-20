@@ -3,8 +3,8 @@ import requests
 import random
 import imghdr
 import os
-import openai
-import stopit
+# import openai
+# import stopit
 import pytesseract
 import cv2
 import sqlite3

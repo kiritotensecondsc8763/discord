@@ -3,7 +3,6 @@ import os
 from discord.ext import commands
 from discord import app_commands
 from bot import Kirito
-from keep_alive import keep_alive
 from command_list import command_list
 from datetime import datetime
 from multiprocessing import Pool
@@ -108,10 +107,4 @@ async def check_treasure_records(ctx: commands.Context, 開始日期: str, 結�
         await ctx.send('查詢失敗', file=discord.File('./image/broken_face.png'))
 
 if __name__ == '__main__':
-    try:
-        # keep_alive()
-        bot.run(TOKEN)
-    except discord.errors.HTTPException:
-        print("blocked by Discord, restarting...")
-        os.system('kill 1')
-        os.system("python restarter.py")
+    bot.run(TOKEN)
