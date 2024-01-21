@@ -5,11 +5,18 @@
 blocks = [
     'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=58973', # 入口1
     'https://gall.dcinside.com/mabi_heroes2/58973', # 入口2
+    'https://gall.dcinside.com/mgallery/board/view/?id=vindic&no=39241' # 入口3
     'https://gall.dcinside.com/mabi_heroes2/1322243' # 煙花暗殺者重複url
 ]
-# update: 2023-04-24
+# update: 2024-01-21
 items = [
-{'name': '黑貓乳膠', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1592464'},
+{'name': '深V經典比基尼', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1779846'},
+{'name': '掛頸新潮比基尼', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1779852'},
+{'name': '透視開叉連衣裙', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1779863'},
+{'name': '武道服', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1726784'},
+{'name': '高爾夫球套裝', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1726847'},
+{'name': '東方鎧甲', 'type': 'detail', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1734946'},
+{'name': '黑貓女王', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1592464'},
 {'name': '葉織詩篇', 'type': 'detail', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1584363'},
 {'name': '露背毛衣', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1557131'},
 {'name': '白色救世主', 'type': 'main', 'url': 'https://gall.dcinside.com/board/view/?id=mabi_heroes2&no=1494565'},
