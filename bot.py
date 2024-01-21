@@ -250,7 +250,7 @@ class Kirito(commands.Bot):
         self.setDPI(filename)
 
         image = Image.open(filename)
-        #os.environ['OMP_THREAD_LIMIT'] = '1' #on Linux
+        pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
         text = pytesseract.image_to_string(image, lang='chi_tra', config='--psm 6')
 
         if os.path.exists(filename):

@@ -1,4 +1,6 @@
 import os
+import platform
+import multiprocessing
 
 MODE = 'test'
 
@@ -15,11 +17,15 @@ treasure_channel = {
     'public': 949541903240675328
 }
 
+os.environ['TESSDATA_PREFIX'] = current_directory = os.path.dirname(os.path.abspath(__file__))
+os.environ['OMP_THREAD_LIMIT'] = '1' if platform.system() == 'Linux' else str(multiprocessing.cpu_count())
+
 TOKEN = os.environ.get(f"DISCORD_BOT_TOKEN_{MODE.upper()}")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 SERVER_ID = server_id[MODE]
 FASHION_CHANNEL = fashion_channel[MODE]
 TREASURE_CHANNEL = treasure_channel[MODE]
+TESSERACT_CMD = '/usr/bin/tesseract' if platform.system() == 'Linux' else r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 DB = 'db' if MODE == 'public' else 'db_test'
 
 HEROES = [
