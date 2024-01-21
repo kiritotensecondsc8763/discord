@@ -40,7 +40,7 @@ class Kirito(commands.Bot):
 
     def write_log(self, message):
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(f"{LOG_DIR}/log.txt", 'a') as f:
+        with open(f"{LOG_DIR}/log.txt", 'a', encoding='utf-8') as f:
             f.write(f"{current_time} - {message}\n")
 
     async def get_fashion(self):
