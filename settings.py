@@ -17,16 +17,24 @@ treasure_channel = {
     'public': 949541903240675328
 }
 
-os.environ['TESSDATA_PREFIX'] = current_directory = os.path.dirname(os.path.abspath(__file__))
-os.environ['OMP_THREAD_LIMIT'] = '1' if platform.system() == 'Linux' else str(multiprocessing.cpu_count())
-
 TOKEN = os.environ.get(f"DISCORD_BOT_TOKEN_{MODE.upper()}")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 SERVER_ID = server_id[MODE]
 FASHION_CHANNEL = fashion_channel[MODE]
 TREASURE_CHANNEL = treasure_channel[MODE]
 TESSERACT_CMD = '/usr/bin/tesseract' if platform.system() == 'Linux' else r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-DB = 'db' if MODE == 'public' else 'db_test'
+DB = 'public' if MODE == 'public' else 'test'
+
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGE_DIR = f"{ROOT_DIR}/data/image"
+DOWNLOAD_DIR = f"{ROOT_DIR}/data/download"
+SR_MODEL_DIR = f"{ROOT_DIR}/data/sr_model"
+TESSDATA_DIR = f"{ROOT_DIR}/data/tessdata"
+DB_DIR = f"{ROOT_DIR}/data/db"
+LOG_DIR = f"{ROOT_DIR}/data/log"
+
+os.environ['TESSDATA_PREFIX'] = TESSDATA_DIR
+os.environ['OMP_THREAD_LIMIT'] = '1' if platform.system() == 'Linux' else str(multiprocessing.cpu_count())
 
 HEROES = [
     '潔西卡到門', '瓊稻穗宮媛', '阿修羅霸凰槍',

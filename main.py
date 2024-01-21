@@ -31,18 +31,21 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if message.author.bot:
-        return
-    if message.channel.id == TREASURE_CHANNEL:
-        filenames = await bot.parse_attachments(message.attachments)
-        if len(filenames) == 0:
+    try:
+        if message.author.bot:
             return
-        if __name__ == '__main__':
-            with Pool(os.cpu_count()) as pool:
-                texts = pool.map(parse_image, filenames)
-            await bot.parse_texts(texts, message)
+        if message.channel.id == TREASURE_CHANNEL:
+            filenames = await bot.parse_attachments(message.attachments)
+            if len(filenames) == 0:
+                return
+            if __name__ == '__main__':
+                with Pool(os.cpu_count()) as pool:
+                    texts = pool.map(parse_image, filenames)
+                await bot.parse_texts(texts, message)
 
-    await bot.process_commands(message)
+        await bot.process_commands(message)
+    except Exception as e:
+        bot.write_log(e)
 
 @bot.hybrid_command(name='時裝', description='隨機PO出時裝')
 @app_commands.guilds(discord.Object(id=SERVER_ID))
@@ -54,10 +57,10 @@ async def fashion(ctx: commands.Context):
         name, file_path, url = await bot.get_fashion()
         await message.delete()
         await channel.send(f"【{name}】", file=discord.File(file_path))
+        os.remove(file_path)
     except Exception as e:
-        with open('log.txt', 'a') as f:
-            f.write(f"{e} url: {url}\n")
-        await channel.send('發生錯誤，再試一次', file=discord.File('./image/broken_face.png'))
+        bot.write_log(f"url: {url}\n{e}")
+        await channel.send('發生錯誤，再試一次', file=discord.File(f"{IMAGE_DIR}/broken_face.png"))
 
 @bot.hybrid_command(name='kirito', description='與桐人對話')
 @app_commands.guilds(discord.Object(id=SERVER_ID))
@@ -66,15 +69,14 @@ async def kirito(ctx: commands.Context, say: str):
         if len(say) == 0:
             return
         await ctx.send(f"{ctx.author.name}: {say}")
-        thinking = await ctx.send('大腦在星爆', file=discord.File('./image/starburst.gif'))
+        thinking = await ctx.send('大腦在星爆', file=discord.File(f"{IMAGE_DIR}/starburst.gif"))
         response = await bot.generate_response(say, 1)
         await thinking.delete()
         await ctx.send(response)
     except Exception as e:
-        with open('log.txt', 'a') as f:
-            f.write(f"{e}\n")
+        bot.write_log(e)
         await thinking.delete()
-        await ctx.send('桐人停止了思考，再試一次', file=discord.File('./image/broken_face.png'))
+        await ctx.send('桐人停止了思考，再試一次', file=discord.File(f"{IMAGE_DIR}/broken_face.png"))
 
 @bot.hybrid_command(name='查詢戰利品紀錄', description='日期格式: yyyyMMdd')
 @app_commands.guilds(discord.Object(id=SERVER_ID))
@@ -102,9 +104,8 @@ async def check_treasure_records(ctx: commands.Context, 開始日期: str, 結�
             return
         await ctx.send(embed=embed)
     except Exception as e:
-        with open('log.txt', 'a') as f:
-            f.write(f"{e}\n")
-        await ctx.send('查詢失敗', file=discord.File('./image/broken_face.png'))
+        bot.write_log(e)
+        await ctx.send('查詢失敗', file=discord.File(f"{IMAGE_DIR}/broken_face.png"))
 
 if __name__ == '__main__':
     bot.run(TOKEN)

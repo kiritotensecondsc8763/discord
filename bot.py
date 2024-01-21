@@ -1,5 +1,6 @@
 import discord
 import requests
+import time
 import random
 import imghdr
 import os
@@ -34,12 +35,17 @@ class Kirito(commands.Bot):
         print(f"Synced slash commands for {self.user}")
 
     async def on_command_error(self, ctx, error):
-        with open('log.txt', 'a') as f:
-            f.write(f"{error}\n")
-        await ctx.send('發生錯誤，再試一次', file=discord.File('./image/broken_face.png'))
+        self.write_log(error)
+        await ctx.send('發生錯誤，再試一次', file=discord.File(f"{IMAGE_DIR}/broken_face.png"))
+
+    def write_log(self, message):
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open(f"{LOG_DIR}/log.txt", 'a') as f:
+            f.write(f"{current_time} - {message}\n")
 
     async def get_fashion(self):
         while True:
+            random.seed(int(time.time()))
             item = random.choice(items)
             url = item['url']
             
@@ -70,77 +76,74 @@ class Kirito(commands.Bot):
 
     async def get_image(self, url):
         headers = {'user-agent': UserAgent().random}
-        with requests.get(url, headers=headers) as response: 
+        with requests.get(url, headers=headers) as response:
             soup = BeautifulSoup(response.text, 'lxml')
             imgs = soup.select('div[class="write_div"] img')
             if len(imgs) == 0:
                 return False
 
-        srcs = []
-        for img in imgs:
-            if img['src'] == 'https://nstatic.dcinside.com/dc/w/images/w_webp.png':
-                continue
-            srcs.append(img['src'])
-        if len(srcs) == 0:
+        srcs = [img['src'] for img in imgs if img['src'] != 'https://nstatic.dcinside.com/dc/w/images/w_webp.png']
+        if not srcs:
             return False
 
         src = random.choice(srcs)
         src = urlparse(src)
         src = src._replace(netloc=src.netloc.replace(src.hostname, 'dcimg4.dcinside.co.kr')).geturl()
         response = requests.get(src, headers=headers, stream=True)
-        base_name = 'fashion'
+        extension = imghdr.what(None, response.content)
+        if not extension:
+            return False
 
-        with open(base_name, 'wb') as f:
+        base_name = 'fashion'
+        file_path = os.path.join(DOWNLOAD_DIR, f"{base_name}.{extension}")
+
+        with open(file_path, 'wb') as f:
             f.write(response.content)
 
-        file_size = os.path.getsize(base_name)
-        print(f"size: {file_size}")
+        file_size = os.path.getsize(file_path)
+        print(f"Size: {self.format_file_size(file_size)}")
         if file_size < 10000:
-            os.remove(base_name)
+            os.remove(file_path)
             return False
-
-        extension = imghdr.what(base_name)
-        if extension == None:
-            os.remove(base_name)
-            return False
-            
-        file_name = f"{base_name}.{extension}"
-        if os.path.isfile(file_name):
-            os.remove(file_name)
-        os.rename(base_name, file_name)
 
         if extension == 'webp' and file_size >= 3000000:
-            file_name = f"{base_name}.{extension}"
-            max_size = 1920, 1080
-            image = Image.open(file_name).convert('RGB')
-            file_name = f"{base_name}.png"
-            image.save(file_name, 'png')
+            max_size = (1920, 1080)
+            image = Image.open(file_path).convert('RGB')
+            file_path_png = os.path.join(DOWNLOAD_DIR, f"{base_name}.png")
+            image.save(file_path_png, 'png')
 
-            file_size = os.path.getsize(file_name)
-            print(f"png resize: {file_size}")
+            os.remove(file_path)
+            file_path = file_path_png
 
-            # image = Image.open(file_name)
-            # file_name = f"{base_name}.gif"
-            # image.info.pop('background', None)
-            # if os.path.isfile(file_name):
-            #     os.remove(file_name)
-            # image.save(file_name, 'gif', save_all=True)
+            file_size = os.path.getsize(file_path)
+            print(f"png resize: {self.format_file_size(file_size)}")
 
         elif extension == 'gif' and file_size >= 8000000:
-            max_size = 320, 240
-            image = Image.open(file_name)
+            max_size = (320, 240)
+            image = Image.open(file_path)
             frames = ImageSequence.Iterator(image)
             frames = self.thumbnails(frames, max_size)
 
             om = next(frames)
             om.info = image.info
-            om.save(file_name, save_all=True, append_images=list(frames))
+            file_path_gif = os.path.join(DOWNLOAD_DIR, f"{base_name}.gif")
+            om.save(file_path_gif, save_all=True, append_images=list(frames))
 
-            file_size = os.path.getsize(file_name)
-            print(f"gif resize: {file_size}")
+            os.remove(file_path)
+            file_path = file_path_gif
 
-        file_path = os.path.realpath(file_name)
+            file_size = os.path.getsize(file_path)
+            print(f"gif resize: {self.format_file_size(file_size)}")
+
         return file_path
+
+    def format_file_size(self, size):
+        size = size / 1024
+        if size < 1024:
+            return f"{size:.2f} KB"
+        else:
+            size = size / 1024
+            return f"{size:.2f} MB"
 
     def thumbnails(self, frames, max_size):
         for frame in frames:
@@ -183,13 +186,12 @@ class Kirito(commands.Bot):
             await channel.send(f"【{name}】", file=discord.File(file_path))
             os.remove(file_path)
         except Exception as e:
-            with open('log.txt', 'a') as f:
-                f.write(f"{e} url: {url}\n")
-            await channel.send('發生錯誤，再試一次', file=discord.File('./image/broken_face.png'))
+            self.write_log(f"url: {url}\n{e}")
+            await channel.send('發生錯誤，再試一次', file=discord.File(f"{IMAGE_DIR}/broken_face.png"))
 
     def super_resolution(self, image, m):
         sr = cv2.dnn_superres.DnnSuperResImpl_create()
-        sr.readModel(f"./LapSRN_x{m}.pb")
+        sr.readModel(f"{SR_MODEL_DIR}/LapSRN_x{m}.pb")
         sr.setModel("lapsrn", m)
         return sr.upsample(image)
 
@@ -218,11 +220,10 @@ class Kirito(commands.Bot):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
-                dir = "./temp"
                 filename = f"t{index}{extension}"
-                if not os.path.exists(dir):
-                    os.makedirs(dir)
-                with open(f"{dir}/{filename}", 'wb') as f:
+                if not os.path.exists(DOWNLOAD_DIR):
+                    os.makedirs(DOWNLOAD_DIR)
+                with open(f"{DOWNLOAD_DIR}/{filename}", 'wb') as f:
                     f.write(await response.content.read())
         return filename
 
@@ -236,7 +237,7 @@ class Kirito(commands.Bot):
         return filenames
 
     def parse_image(self, filename):
-        filename = f"./temp/{filename}"
+        filename = f"{DOWNLOAD_DIR}/{filename}"
 
         image = cv2.imread(filename)
         image = self.super_resolution(image, 2)
@@ -334,11 +335,11 @@ class Kirito(commands.Bot):
         if len(records) == 0 or (len(records) > 1 and len(treasure_records) == 0):
             return
 
-        await message.channel.send(file=discord.File('./image/congratulations.png'))
+        await message.channel.send(file=discord.File(f"{IMAGE_DIR}/congratulations.png"))
         await message.channel.send(self.generate_congratulations(records))
 
     def insert_data(self, records):
-        connection = sqlite3.connect(DB)
+        connection = sqlite3.connect(os.path.join(DB_DIR, DB))
 
         sql =   """
                 CREATE TABLE IF NOT EXISTS `treasures` (
@@ -419,7 +420,7 @@ class Kirito(commands.Bot):
         else:
             title = '戰利品查詢結果'
 
-        connection = sqlite3.connect(DB)
+        connection = sqlite3.connect(os.path.join(DB_DIR, DB))
         connection.row_factory = sqlite3.Row
         sql =   f"""
                 SELECT `name`, `item` 
