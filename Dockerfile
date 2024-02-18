@@ -4,10 +4,17 @@ WORKDIR /app
 
 COPY . .
 
-RUN apt-get update \
-    && apt-get install -y libgl1-mesa-glx libglib2.0-0 tesseract-ocr \
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    tesseract-ocr \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip install -r requirements.txt
+    && rm -rf /var/lib/apt/lists/*
+
+RUN adduser --disabled-password --gecos '' appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["python", "main.py"]
