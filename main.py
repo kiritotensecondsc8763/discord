@@ -6,6 +6,7 @@ from bot import Kirito
 from command_list import command_list
 from datetime import datetime
 from multiprocessing import Pool
+from keep_alive import keep_alive
 from settings import *
 
 bot = Kirito()
@@ -108,4 +109,5 @@ async def check_treasure_records(ctx: commands.Context, 開始日期: str, 結�
         await ctx.send('查詢失敗', file=discord.File(f"{IMAGE_DIR}/broken_face.png"))
 
 if __name__ == '__main__':
+    keep_alive()
     bot.run(TOKEN)
